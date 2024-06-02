@@ -47,7 +47,10 @@ namespace Program {
 			};
 
 
-			addChatMessage(chatData, "user", userPrompt);
+			if ( !addChatMessage(chatData, "user", userPrompt) ) {
+				Console.WriteLine("Error: Could not add chat message");
+				return;
+			}
 
 			string myJson = JsonSerializer.Serialize(chatData);
 
@@ -68,10 +71,10 @@ namespace Program {
 
 		}
 
-		public static void addChatMessage(ChatData? chatData, string? role, string? content) {
+		public static bool addChatMessage(ChatData? chatData, string? role, string? content) {
 
 			if (chatData == null || role == null || content == null) {
-				return;
+				return false;
 			}
 
 			chatData.messages.Add(new Dictionary<string,string>());
@@ -79,6 +82,7 @@ namespace Program {
 			chatData.messages[chatData.messages.Count - 1].Add("role", role);
 			chatData.messages[chatData.messages.Count - 1].Add("content", content);
 
+			return true;
 		}
 	}
 }
