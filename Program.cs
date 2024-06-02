@@ -6,8 +6,11 @@ using System;
 using System.Collections.Generic;
 using System.Text.Json;
 using System.Text;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Threading.Tasks;
 
-namespace chatGptApiExample {
+namespace Program {
 
 	public class ChatData {
 		public string? model {get; set;}
@@ -15,7 +18,7 @@ namespace chatGptApiExample {
 	}
 
 	class Program {
-		static void Main(string[] args) {
+		static async Task Main(string[] args) {
 
 			string? apiKey = Environment.GetEnvironmentVariable("OPENAI_API_KEY");
 
@@ -45,10 +48,24 @@ namespace chatGptApiExample {
 
 
 			addChatMessage(chatData, "user", userPrompt);
-			addChatMessage(chatData, "system", userPrompt);
 
 			string myJson = JsonSerializer.Serialize(chatData);
-			Console.WriteLine(myJson);
+
+
+			// Send the api request
+
+			HttpClient client = new HttpClient();
+
+			client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
+
+			StringContent content = new StringContent(myJson, Encoding.UTF8, "application/json");
+
+			HttpResponseMessage response = await client.PostAsync("https://api.openai.com/v1/chat/completions", content);
+
+			string responseBody = await response.Content.ReadAsStringAsync();
+
+			Console.WriteLine(responseBody);
+
 		}
 
 		public static void addChatMessage(ChatData? chatData, string? role, string? content) {
