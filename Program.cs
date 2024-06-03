@@ -1,7 +1,3 @@
-/* James Sofios
- * 2024-06-01
- */
-
 using System;
 using System.Collections.Generic;
 using System.Text.Json;
@@ -15,6 +11,12 @@ namespace Program {
 	public class ChatData {
 		public string? model {get; set;}
 		public List<Dictionary<string, string>>? messages {get; set;}
+
+		public ChatData() {
+			model = "gpt-3.5-turbo";
+			messages = new List<Dictionary<string, string>>();
+		}
+
 	}
 
 	class Program {
@@ -33,7 +35,7 @@ namespace Program {
 				return;
 			}
 
-			StringBuilder builder = new();
+			StringBuilder builder = new StringBuilder();
 
 			foreach (var arg in args) {
 				builder.Append($"{arg} ");
@@ -41,21 +43,15 @@ namespace Program {
 
 			string userPrompt = builder.ToString().TrimEnd();
 
-			ChatData chatData = new ChatData {
-				model = "gpt-3.5-turbo",
-				messages = new List<Dictionary<string, string>>()
-			};
+			ChatData chatData = new ChatData();
 
-
-			if ( !addChatMessage(chatData, "user", userPrompt) ) {
+			if (addChatMessage(chatData, "user", userPrompt) == null) {
 				Console.WriteLine("Error: Could not add chat message");
 				return;
 			}
 
 			string myJson = JsonSerializer.Serialize(chatData);
 
-
-			// Send the api request
 
 			HttpClient client = new HttpClient();
 
@@ -71,10 +67,10 @@ namespace Program {
 
 		}
 
-		public static bool addChatMessage(ChatData? chatData, string? role, string? content) {
+		public static ChatData? addChatMessage(ChatData? chatData, string? role, string? content) {
 
-			if (chatData == null || role == null || content == null) {
-				return false;
+			if (chatData == null || chatData.messages == null || role == null || content == null) {
+				return null;
 			}
 
 			chatData.messages.Add(new Dictionary<string,string>());
@@ -82,7 +78,7 @@ namespace Program {
 			chatData.messages[chatData.messages.Count - 1].Add("role", role);
 			chatData.messages[chatData.messages.Count - 1].Add("content", content);
 
-			return true;
+			return chatData;
 		}
 	}
 }
